@@ -20,10 +20,17 @@ export async function sendVerifyEmail(args: {
     VerifyEmail({ username: args.username, code: args.code }),
   );
 
-  return resend.emails.send({
+  const { data, error } = await resend.emails.send({
     from: MAIL_FROM!,
     to: args.to,
     subject: "Your FeedbackBox verification code",
     html,
   });
+
+  if (error) {
+    console.error("Resend email error:", error);
+    throw new Error(`Failed to send verification email: ${error.message}`);
+  }
+
+  return data;
 }

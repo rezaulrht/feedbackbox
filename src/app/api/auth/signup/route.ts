@@ -47,12 +47,16 @@ export async function POST(req: Request) {
       verifyCodeExpiry,
     });
 
-    // send verification email
-    await sendVerifyEmail({
-      to: body.email,
-      username: body.username,
-      code: verifyCode,
-    });
+    // send verification email (skip in dev mode)
+    if (process.env.NODE_ENV !== "development") {
+      await sendVerifyEmail({
+        to: body.email,
+        username: body.username,
+        code: verifyCode,
+      });
+    } else {
+      console.log(`[DEV] Verification code for ${body.email}: ${verifyCode}`);
+    }
 
     return NextResponse.json(
       {
@@ -64,11 +68,11 @@ export async function POST(req: Request) {
       { status: 201 },
     );
   } catch (error) {
-    if (error instanceof ZodError){
-        return NextResponse.json(
-            { ok: false, errors: error.flatten().fieldErrors         },
-            { status: 400 }
-        );
+    if (error instanceof ZodError) {
+      return NextResponse.json(
+        { ok: false, errors: error.flatten().fieldErrors },
+        { status: 400 },
+      );
     }
     console.error("Signup error:", error);
     return NextResponse.json(
@@ -77,4 +81,3 @@ export async function POST(req: Request) {
     );
   }
 }
-
