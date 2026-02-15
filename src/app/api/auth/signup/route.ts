@@ -1,4 +1,5 @@
 import { dbConnect } from "@/lib/db";
+import { sendVerifyEmail } from "@/lib/mailer";
 import UserModel from "@/models/User";
 import { signupSchema } from "@/validators/auth";
 import bcrypt from "bcryptjs";
@@ -46,7 +47,12 @@ export async function POST(req: Request) {
       verifyCodeExpiry,
     });
 
-    // email sending wll be implemented in the future, for now we just return the code in the response
+    // send verification email
+    await sendVerifyEmail({
+      to: body.email,
+      username: body.username,
+      code: verifyCode,
+    });
 
     return NextResponse.json(
       {
@@ -71,3 +77,4 @@ export async function POST(req: Request) {
     );
   }
 }
+
